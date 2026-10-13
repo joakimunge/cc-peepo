@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 import type { On } from 'claude-code'
-import { GLYPHS, GUIDE, withPeepos } from './register'
+import { GLYPHS, GUIDE, GUIDE_OFF, IMPORT, withPeepos } from './register'
 import { PEEPOS } from './peepos'
 
 const clap = GLYPHS.get('peepo_clap')!
@@ -76,6 +76,50 @@ test('a session starts with peepos on when an earlier one turned them on', async
   await start($, on)
   await $.ui.mount(reply)
   expect(seen).toEqual([`Fixed ${clap}`])
+})
+
+test('a plugin that draws replies itself gets peepos in its Text, while on', async ($, on) => {
+  mock.store(on)
+  // as opencode-look does, from the table, never handing the text on (its own text, as if it stood above)
+  on('ui.render', { component: 'AssistantMessage' }, (($: { ui: { resolve: (e: unknown) => { Text: (p: object) => unknown } } }, e: unknown) =>
+    $.ui.resolve(e).Text({ children: ['Drawn ', ':peepo_gg:', ' and :peepo_clap:'] })) as never)
+  await start($, on)
+  const drawn = async () => (await $.ui.mount(reply)).find({ type: 'Text' })
+  expect(await drawn()).toMatchObject({ children: ['Drawn ', ':peepo_gg:', ' and :peepo_clap:'] })
+  await peepo($, 'on')
+  expect(await drawn()).toMatchObject({ children: ['Drawn ', gg, ` and ${clap}`] })
+})
+
+/** a home at /home/u: what is written there, and a CLAUDE.md when one is given */
+const home = (on: On, claudeMd?: string) => {
+  const written: Record<string, string> = {}
+  mock.env(on, { HOME: '/home/u' })
+  on('fs.write', ((_$: unknown, e: { path: string; text: string }) => {
+    written[e.path] = e.text
+    return { value: undefined }
+  }) as never)
+  on('fs.read', ((_$: unknown, e: { path: string }) => {
+    if (e.path === '/home/u/.claude/CLAUDE.md' && claudeMd !== undefined) return { value: claudeMd }
+    throw new Error(`ENOENT: ${e.path}`)
+  }) as never)
+  return written
+}
+
+test('the guide is kept in ~/.claude/peepo/guide.md for CLAUDE.md to import, and /peepo asks for the import', async ($, on) => {
+  mock.store(on)
+  const written = home(on)
+  await start($, on)
+  expect(written['/home/u/.claude/peepo/guide.md']).toBe(`${GUIDE_OFF}\n`)
+  await peepo($, 'on')
+  expect(written['/home/u/.claude/peepo/guide.md']).toBe(`${GUIDE}\n`)
+  expect((await peepo($, '')).text).toContain(IMPORT)
+})
+
+test('/peepo stops asking for the import once CLAUDE.md has it', async ($, on) => {
+  mock.store(on)
+  home(on, `# Mine\n\n${IMPORT}\n`)
+  await start($, on)
+  expect((await peepo($, '')).text).not.toContain(IMPORT)
 })
 
 test('/peepo alone shows the test frogs', async ($, on) => {

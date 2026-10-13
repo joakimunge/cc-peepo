@@ -47,6 +47,19 @@ Then check and switch on:
 If setup picks the wrong terminal, name it: `/peepo setup iterm2`, `/peepo setup ghostty` or `/peepo setup kitty`. If
 you change your terminal font or size, run setup again.
 
+### Team and Enterprise accounts
+
+On a Team or Enterprise account, Claude Code's built-in security default keeps installed plugins out of Claude's
+system prompt, so Claude never hears about the peepos from the plugin. The plugin keeps the same guide in
+`~/.claude/peepo/guide.md` instead; add this line to your `~/.claude/CLAUDE.md` and Claude reads it from the next
+session on:
+
+```
+@~/.claude/peepo/guide.md
+```
+
+`/peepo` reminds you while that line is missing. While peepos are off, the file only says so.
+
 ## Commands
 
 | Command | |
@@ -63,8 +76,10 @@ you change your terminal font or size, run setup again.
 - The font stores the slices as PNG pictures in an `sbix` table, the way Apple Color Emoji does. It's sized from your
   terminal font's own cell: three cells wide and 1.3 lines tall, centred on the text.
 - While peepos are on, the plugin adds a short section to Claude's system prompt that names every peepo and when to
-  use one. In each reply it turns shortcodes like `:peepo_clap:` (outside code) into the frog's characters, before the
-  reply is drawn. It works with any other plugin that draws replies.
+  use one (or, on Team and Enterprise accounts, your `CLAUDE.md` imports it). In each reply it turns shortcodes like
+  `:peepo_clap:` (outside code) into the frog's characters, before the reply is drawn.
+- It works with other plugins that draw replies themselves, such as OpenCode look: the text they draw with turns
+  shortcodes into frogs too. There a shortcode inside inline code becomes a frog as well.
 - iTerm2 needs two workarounds, which setup handles. iTerm2 only draws a glyph in colour if its font's family is
   Apple's emoji font, so the font's family is `AppleColorEmoji`, distinct from Apple's own `Apple Color Emoji`. iTerm2
   also places emoji lower than text, so on iTerm2 the frogs are raised to match.
