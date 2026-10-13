@@ -1,0 +1,6 @@
+{
+  "name": "peepo",
+  "description": "Peepo emoji for Claude Code: inline, full colour, in iTerm2, Ghostty and kitty.",
+  "owner": { "name": "Joakim Unge" },
+  "plugins": [{ "name": "peepo", "source": "./" }]
+}

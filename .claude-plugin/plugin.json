@@ -1,0 +1,9 @@
+{
+  "name": "peepo",
+  "version": "0.1.0",
+  "description": "Claude reacts with peepos, the little green frogs of Twitch and Slack, inline in its replies like any emoji, drawn in full colour by a font /peepo setup builds on your machine.",
+  "types": "./types/index.d.ts",
+  "author": { "name": "Joakim Unge" },
+  "repository": "https://github.com/joakimunge/cc-peepo",
+  "license": "MIT"
+}
